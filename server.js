@@ -8,8 +8,8 @@ server.use(cors());
 server.use(express.json());
 
 
-// mongoose.connect(`${process.env.MONGO_DB}`, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
+
+mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laqm4.mongodb.net:27017,cluster0-shard-00-01.laqm4.mongodb.net:27017,cluster0-shard-00-02.laqm4.mongodb.net:27017/travel?ssl=true&replicaSet=atlas-kjugp2-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 
 
@@ -92,7 +92,7 @@ server.get('/places', gettingPlaces)
 function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
-    userModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
+    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) {
             res.send('did not work')
         } else {
