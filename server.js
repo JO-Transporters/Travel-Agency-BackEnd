@@ -145,9 +145,13 @@ server.delete('/deletehotel/:placeId/:hotelIndex', deleteHotel)
 server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 
 // // These requests for Booked Rooms Information
+
+server.get('/mybooks/:email', myBooks)
 server.post('/addnewbook', bookroom);
-// server.put('/updatebook/:id', updateBookedData);
-// server.delete('/deletebook/:id', deletebookedData);
+server.put('/updatebook/:id/:email', updateBookedData);
+server.delete('/deletebook/:id/:email', deletebookedData);
+
+
 
 
 
@@ -294,68 +298,156 @@ function updateHotel(req, res) {
 
 // User Functionality :
 
-function bookroom(req, res) {
-    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
 
-    userModel.find({ usersList : "usersList"}, function (error, userData) {
+function myBooks(req, res) {
+
+
+    const userEmail = req.params.email;
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
         if (error) {
             res.send(error);
         } else {
-            userData[0].users.map(user =>{
-                if(user.userEmail == userEmail){
-                    
-                }
+            let returnedUser = userData[0].users.filter(user => {
 
-
+                if (user.userEmail == userEmail) { return user }
             })
+            res.send(returnedUser)
+        }
+    })
+}
+
+function bookroom(req, res) {
+    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
+    console.log('req.body : ', req.body);
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            let returnedUser = userData[0].users.filter(user => {
+                // If the user existed 
+                if (user.userEmail == userEmail) {
+
+                    user.bookedData.push({
+                        hotelName: hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    })
+                    userData[0].save();
+                    res.send(user);
+
+                    return user
+                }
+            })
+            console.log('old info : ', userData[0].users);
+            console.log('returned user :', returnedUser);
+            //To ckeck if there in no user
+            if (returnedUser.length == 0) {
+                userData[0].users.push({
+                    userName: userName,
+                    userEmail: userEmail,
+                    phoneNumber: phoneNumber,
+                    bookedData: [{
+                        hotelName: hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    }]
+                })
+                userData[0].save();
+
+                let user = userData[0].users.filter(user => {
+                    if (user.userEmail == userEmail) {
+                        return user
+                    }
+                })
+
+                console.log('response user :', user);
+                res.send(user);
+
+                console.log('updated data : ', userData[0].users);
+            }
+
+
+
+
         }
 
     })
 }
 
-// function updateBookedData(req, res) {
-//     let bookedId = Number(req.params.id);
+function updateBookedData(req, res) {
+    let bookedId = Number(req.params.id);
+    let userEmail = req.params.email;
 
-//     const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
+    const {hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum } = req.body;
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            userData[0].users.filter((user, userIndex) => {
+
+                if (user.userEmail == userEmail) {
+
+                    let updatedBooks = userData[0].users[userIndex].bookedData.splice(bookedId,1,{
+                        hotelName : hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    })
+                    userData[0].save();
+
+                    res.send(userData[0].users[userIndex]);
+
+                }
+            })
+        }
+    })
 
 
-//     bookedModel.findOne({ email: userEmail }, function (error, userData) {
-//         if (error) { res.send('did not work') }
-//         else {
-//             let newObj = {
-//                 hotelName: hotelName,
-//                 checkInDate: checkInDate,
-//                 checkOutDate: checkOutDate,
-//                 visitorsNum: visitorsNum,
-//                 roomsNum: roomsNum,
-//                 kidsNum: kidsNum
-//             }
-//             userData.bookedData[bookedId] = newObj;
-//             userData.save();
-//             res.send(userData.bookedData);
-//         }
-//     })
-// }
 
-// function deletebookedData(req, res) {
-//     let bookedIndex = Number(req.params.id);
 
-//     const { userEmail } = req.body;
+   
+}
 
-//     bookedModel.find({ email: userEmail }, function (error, userData) {
-//         if (error) {
-//             res.send('did not work')
-//         } else {
-//             let filterdBooks = userData[0].bookedData[bookedIndex].filter((booked, index) => {
-//                 if (index !== bookedIndex) { return booked }
-//             })
+function deletebookedData(req, res) {
+    let bookedIndex = Number(req.params.id);
 
-//             userData[0].bookedData[bookedIndex] = filterdBooks;
-//             userData[0].save();
-//             res.send(userData[0].bookedData);
-//         }
-//     })
-// }
+    const userEmail = req.params.email;
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            userData[0].users.filter((user, userIndex) => {
+
+                if (user.userEmail == userEmail) {
+                    console.log('old data : ', userData[0].users[userIndex].bookedData);
+
+                    let filteredBooks = userData[0].users[userIndex].bookedData.filter((book, index) => {
+                        if (index !== bookedIndex) { return book }
+
+                    })
+                    userData[0].users[userIndex].bookedData = filteredBooks;
+                    userData[0].save();
+                    res.send(userData[0].users[userIndex].bookedData);
+
+                }
+            })
+        }
+    })
+}
+
+
+
 
 server.listen(3001, () => {
     console.log(`Listenng on Port : ${3001}`);
