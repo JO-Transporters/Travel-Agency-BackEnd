@@ -47,6 +47,7 @@ const UserSchema = new mongoose.Schema({
     bookedData: [BookedSchema]
 
 
+
 });
 const UsersSchema = new mongoose.Schema({
     usersList: String,
@@ -144,10 +145,13 @@ server.delete('/deletehotel/:placeId/:hotelIndex', deleteHotel)
 server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 
 // // These requests for Booked Rooms Information
+
 server.get('/mybooks/:email', myBooks)
 server.post('/addnewbook', bookroom);
 server.put('/updatebook/:id/:email', updateBookedData);
 server.delete('/deletebook/:id/:email', deletebookedData);
+
+
 
 
 
@@ -293,6 +297,7 @@ function updateHotel(req, res) {
 }
 
 // User Functionality :
+
 
 function myBooks(req, res) {
 
@@ -440,6 +445,9 @@ function deletebookedData(req, res) {
         }
     })
 }
+
+
+
 
 server.listen(3001, () => {
     console.log(`Listenng on Port : ${3001}`);
