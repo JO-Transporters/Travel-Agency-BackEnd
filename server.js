@@ -11,6 +11,9 @@ server.use(express.json());
 
 mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laqm4.mongodb.net:27017,cluster0-shard-00-01.laqm4.mongodb.net:27017,cluster0-shard-00-02.laqm4.mongodb.net:27017/travel?ssl=true&replicaSet=atlas-kjugp2-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
+// mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
+
+
 
 
 const PlaceSchema = new mongoose.Schema({
@@ -28,7 +31,7 @@ const UserSchema = new mongoose.Schema({
     userName  : String,
     userEmail : String,
     phoneNumber : String,
-    
+
 
  });
 const UsersSchema = new mongoose.Schema({
@@ -37,7 +40,6 @@ const UsersSchema = new mongoose.Schema({
 
 const adminModel = mongoose.model('Admin', AdminSchema);
 const userModel = mongoose.model('User', UsersSchema);
-
 
 
 function seedplaceCollection() {
@@ -87,20 +89,80 @@ seedplaceCollection();
 
 //http://localhost:3001/places?userEmail=ibrahimkuderat@gmail.com
 
-server.get('/places', gettingPlaces)
+server.get('/places', gettingPlaces);
+server.post('/add' , addPlace);
+server.delete('/delete/:placeId', deletePlace)
+server.put('/update/:placeId', updatePlace)
 
 function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
-    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
+
+    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) =>{
+
         if (error) {
             res.send('did not work')
         } else {
-            console.log(userData[0].places);
             res.send(userData[0].places)
         }
     })
 }
+
+
+function addPlace(req,res) {
+    const {name , img } = req.body;
+    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
+        if (error) {
+            res.send('did not work')
+        } else {
+            userData[0].places.push({
+                name : name,
+                img : img
+            })
+            userData[0].save()
+            res.send(userData[0].places)
+        }
+    })
+
+}
+
+function deletePlace (req,res) {
+ let placeIndex = Number(req.params.placeId)
+
+ adminModel.find({email:'ibrahimkuderat@gmail.com'} , function (error, userData){
+     if (error) {
+         res.send('did not work')
+     } else {
+       let filterdPlaces =  userData[0].places.filter((place , index)=>{
+            if (index !== placeIndex) {return place}
+         })
+
+         userData[0].places = filterdPlaces
+         userData[0].save();
+         res.send(userData[0].places)
+     }
+ })
+
+}
+
+
+function updatePlace (req,res){
+    let placeIndex = req.params.placeId;
+    const {name,img} = req.body;
+
+    adminModel.findOne({email :'ibrahimkuderat@gmail.com' } , function (error,userData){
+        if (error) { res.send('did not work')}
+        else {
+            userData.places.splice(placeIndex,1,{
+                name : name,
+                img : img,
+            })
+            userData.save();
+            res.send(userData.places)
+        }
+    })
+}
+
 
 server.listen(3001, () => {
     console.log(`Listenng on Port : ${3001}`);
