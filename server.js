@@ -35,6 +35,7 @@ const UserSchema = new mongoose.Schema({
     userName: String,
     userEmail: String,
     phoneNumber: String,
+    
 
 
 });
