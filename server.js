@@ -8,6 +8,7 @@ server.use(cors());
 server.use(express.json());
 
 
+
 mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laqm4.mongodb.net:27017,cluster0-shard-00-01.laqm4.mongodb.net:27017,cluster0-shard-00-02.laqm4.mongodb.net:27017/travel?ssl=true&replicaSet=atlas-kjugp2-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
 // mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
@@ -18,7 +19,6 @@ const HotelSchema = new mongoose.Schema({
     hotelRate: String,
     location: String,
     hotelimg: String,
-
 })
 const PlaceSchema = new mongoose.Schema({
     name: String,
@@ -31,21 +31,33 @@ const AdminSchema = new mongoose.Schema({
     places: [PlaceSchema]
 });
 
+const BookedSchema = new mongoose.Schema({
+    hotelName: String,
+    checkInDate: String,
+    checkOutDate: String,
+    visitorsNum: String,
+    roomsNum: String,
+    kidsNum: String
+})
+
 const UserSchema = new mongoose.Schema({
     userName: String,
     userEmail: String,
     phoneNumber: String,
-    
+    bookedData: [BookedSchema]
 
 
 });
 const UsersSchema = new mongoose.Schema({
+    usersList: String,
     users: [UserSchema]
 });
 
+
+
 const adminModel = mongoose.model('Admin', AdminSchema);
 const userModel = mongoose.model('User', UsersSchema);
-
+const bookedModel = mongoose.model('BookedRoom', UserSchema);
 
 function seedplaceCollection() {
 
@@ -91,8 +103,31 @@ function seedplaceCollection() {
 }
 
 
-seedplaceCollection();
+// seedplaceCollection();
 
+function seedUserCollection() {
+    const user = new userModel({
+        usersList: 'usersList',
+        users: [
+            {
+                userName: "Mosaab Alhayek مصعب الحايك",
+                userEmail: "alhayek214@gmail.com",
+                phoneNumber: "0780374982",
+                bookedData: [{
+                    hotelName: "Royal",
+                    checkInDate: "",
+                    checkOutDate: "",
+                    visitorsNum: "",
+                    roomsNum: "",
+                    kidsNum: ""
+                }]
+            }
+
+        ]
+    })
+    user.save();
+}
+// seedUserCollection();
 
 //http://localhost:3001/places?userEmail=ibrahimkuderat@gmail.com
 
@@ -108,6 +143,11 @@ server.post('/addHotel/:Id', addHotel);
 server.delete('/deletehotel/:placeId/:hotelIndex', deleteHotel)
 server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 
+// // These requests for Booked Rooms Information
+server.get('/mybooks/:email', myBooks)
+server.post('/addnewbook', bookroom);
+server.put('/updatebook/:id/:email', updateBookedData);
+server.delete('/deletebook/:id/:email', deletebookedData);
 
 
 
@@ -117,7 +157,9 @@ server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
+
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) => {
+
         if (error) {
             res.send('did not work')
         } else {
@@ -205,7 +247,7 @@ function addHotel(req, res) {
 
 }
 
-function deleteHotel (req,res){
+function deleteHotel(req, res) {
     placeIndex = Number(req.params.placeId);
     hotelIndex = Number(req.params.hotelIndex);
 
@@ -222,24 +264,24 @@ function deleteHotel (req,res){
             res.send(userData[0].places)
         }
     })
-   
+
 
 }
 
-function updateHotel (req,res){
+function updateHotel(req, res) {
     let placeIndex = req.params.placeId;
     let hotelIndex = req.params.hotelIndex;
-    const { hotelName, hotelRate, location, hotelimg} = req.body
+    const { hotelName, hotelRate, location, hotelimg } = req.body
 
-    
+
     adminModel.findOne({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) { res.send('did not work') }
         else {
             userData.places[placeIndex].hotels.splice(hotelIndex, 1, {
                 hotelName: hotelName,
                 hotelRate: hotelRate,
-                location : location,
-                hotelimg : hotelimg
+                location: location,
+                hotelimg: hotelimg
             })
             userData.save();
             res.send(userData.places)
@@ -248,6 +290,155 @@ function updateHotel (req,res){
 
 
 
+}
+
+// User Functionality :
+
+function myBooks(req, res) {
+
+
+    const userEmail = req.params.email;
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            let returnedUser = userData[0].users.filter(user => {
+
+                if (user.userEmail == userEmail) { return user }
+            })
+            res.send(returnedUser)
+        }
+    })
+}
+
+function bookroom(req, res) {
+    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
+    console.log('req.body : ', req.body);
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            let returnedUser = userData[0].users.filter(user => {
+                // If the user existed 
+                if (user.userEmail == userEmail) {
+
+                    user.bookedData.push({
+                        hotelName: hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    })
+                    userData[0].save();
+                    res.send(user);
+
+                    return user
+                }
+            })
+            console.log('old info : ', userData[0].users);
+            console.log('returned user :', returnedUser);
+            //To ckeck if there in no user
+            if (returnedUser.length == 0) {
+                userData[0].users.push({
+                    userName: userName,
+                    userEmail: userEmail,
+                    phoneNumber: phoneNumber,
+                    bookedData: [{
+                        hotelName: hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    }]
+                })
+                userData[0].save();
+
+                let user = userData[0].users.filter(user => {
+                    if (user.userEmail == userEmail) {
+                        return user
+                    }
+                })
+
+                console.log('response user :', user);
+                res.send(user);
+
+                console.log('updated data : ', userData[0].users);
+            }
+
+
+
+
+        }
+
+    })
+}
+
+function updateBookedData(req, res) {
+    let bookedId = Number(req.params.id);
+    let userEmail = req.params.email;
+
+    const {hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum } = req.body;
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            userData[0].users.filter((user, userIndex) => {
+
+                if (user.userEmail == userEmail) {
+
+                    let updatedBooks = userData[0].users[userIndex].bookedData.splice(bookedId,1,{
+                        hotelName : hotelName,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        visitorsNum: visitorsNum,
+                        roomsNum: roomsNum,
+                        kidsNum: kidsNum
+                    })
+                    userData[0].save();
+
+                    res.send(userData[0].users[userIndex]);
+
+                }
+            })
+        }
+    })
+
+
+
+
+   
+}
+
+function deletebookedData(req, res) {
+    let bookedIndex = Number(req.params.id);
+
+    const userEmail = req.params.email;
+
+    userModel.find({ usersList: "usersList" }, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            userData[0].users.filter((user, userIndex) => {
+
+                if (user.userEmail == userEmail) {
+                    console.log('old data : ', userData[0].users[userIndex].bookedData);
+
+                    let filteredBooks = userData[0].users[userIndex].bookedData.filter((book, index) => {
+                        if (index !== bookedIndex) { return book }
+
+                    })
+                    userData[0].users[userIndex].bookedData = filteredBooks;
+                    userData[0].save();
+                    res.send(userData[0].users[userIndex].bookedData);
+
+                }
+            })
+        }
+    })
 }
 
 server.listen(3001, () => {
