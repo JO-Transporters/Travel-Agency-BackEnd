@@ -31,20 +31,34 @@ const AdminSchema = new mongoose.Schema({
     places: [PlaceSchema]
 });
 
+const BookedSchema = new mongoose.Schema({
+    hotelName: String,
+    checkInDate: String,
+    checkOutDate: String,
+    visitorsNum: String,
+    roomsNum: String,
+    kidsNum: String
+})
+
 const UserSchema = new mongoose.Schema({
     userName: String,
     userEmail: String,
     phoneNumber: String,
+    bookedData: [BookedSchema]
+
 
 
 });
 const UsersSchema = new mongoose.Schema({
+    usersList: String,
     users: [UserSchema]
 });
 
+
+
 const adminModel = mongoose.model('Admin', AdminSchema);
 const userModel = mongoose.model('User', UsersSchema);
-
+const bookedModel = mongoose.model('BookedRoom', UserSchema);
 
 function seedplaceCollection() {
 
@@ -90,8 +104,31 @@ function seedplaceCollection() {
 }
 
 
-seedplaceCollection();
+// seedplaceCollection();
 
+function seedUserCollection() {
+    const user = new userModel({
+        usersList: 'usersList',
+        users: [
+            {
+                userName: "Mosaab Alhayek مصعب الحايك",
+                userEmail: "alhayek214@gmail.com",
+                phoneNumber: "0780374982",
+                bookedData: [{
+                    hotelName: "Royal",
+                    checkInDate: "",
+                    checkOutDate: "",
+                    visitorsNum: "",
+                    roomsNum: "",
+                    kidsNum: ""
+                }]
+            }
+
+        ]
+    })
+    user.save();
+}
+// seedUserCollection();
 
 //http://localhost:3001/places?userEmail=ibrahimkuderat@gmail.com
 
@@ -107,6 +144,10 @@ server.post('/addHotel/:Id', addHotel);
 server.delete('/deletehotel/:placeId/:hotelIndex', deleteHotel)
 server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 
+// // These requests for Booked Rooms Information
+server.post('/addnewbook', bookroom);
+// server.put('/updatebook/:id', updateBookedData);
+// server.delete('/deletebook/:id', deletebookedData);
 
 
 
@@ -117,7 +158,7 @@ function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
 
-    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) =>{
+    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) => {
 
         if (error) {
             res.send('did not work')
@@ -206,7 +247,7 @@ function addHotel(req, res) {
 
 }
 
-function deleteHotel (req,res){
+function deleteHotel(req, res) {
     placeIndex = Number(req.params.placeId);
     hotelIndex = Number(req.params.hotelIndex);
 
@@ -223,24 +264,24 @@ function deleteHotel (req,res){
             res.send(userData[0].places)
         }
     })
-   
+
 
 }
 
-function updateHotel (req,res){
+function updateHotel(req, res) {
     let placeIndex = req.params.placeId;
     let hotelIndex = req.params.hotelIndex;
-    const { hotelName, hotelRate, location, hotelimg} = req.body
+    const { hotelName, hotelRate, location, hotelimg } = req.body
 
-    
+
     adminModel.findOne({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) { res.send('did not work') }
         else {
             userData.places[placeIndex].hotels.splice(hotelIndex, 1, {
                 hotelName: hotelName,
                 hotelRate: hotelRate,
-                location : location,
-                hotelimg : hotelimg
+                location: location,
+                hotelimg: hotelimg
             })
             userData.save();
             res.send(userData.places)
@@ -250,6 +291,71 @@ function updateHotel (req,res){
 
 
 }
+
+// User Functionality :
+
+function bookroom(req, res) {
+    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
+
+    userModel.find({ usersList : "usersList"}, function (error, userData) {
+        if (error) {
+            res.send(error);
+        } else {
+            userData[0].users.map(user =>{
+                if(user.userEmail == userEmail){
+                    
+                }
+
+
+            })
+        }
+
+    })
+}
+
+// function updateBookedData(req, res) {
+//     let bookedId = Number(req.params.id);
+
+//     const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
+
+
+//     bookedModel.findOne({ email: userEmail }, function (error, userData) {
+//         if (error) { res.send('did not work') }
+//         else {
+//             let newObj = {
+//                 hotelName: hotelName,
+//                 checkInDate: checkInDate,
+//                 checkOutDate: checkOutDate,
+//                 visitorsNum: visitorsNum,
+//                 roomsNum: roomsNum,
+//                 kidsNum: kidsNum
+//             }
+//             userData.bookedData[bookedId] = newObj;
+//             userData.save();
+//             res.send(userData.bookedData);
+//         }
+//     })
+// }
+
+// function deletebookedData(req, res) {
+//     let bookedIndex = Number(req.params.id);
+
+//     const { userEmail } = req.body;
+
+//     bookedModel.find({ email: userEmail }, function (error, userData) {
+//         if (error) {
+//             res.send('did not work')
+//         } else {
+//             let filterdBooks = userData[0].bookedData[bookedIndex].filter((booked, index) => {
+//                 if (index !== bookedIndex) { return booked }
+//             })
+
+//             userData[0].bookedData[bookedIndex] = filterdBooks;
+//             userData[0].save();
+//             res.send(userData[0].bookedData);
+//         }
+//     })
+// }
 
 server.listen(3001, () => {
     console.log(`Listenng on Port : ${3001}`);
