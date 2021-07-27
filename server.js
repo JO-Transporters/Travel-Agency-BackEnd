@@ -10,8 +10,17 @@ server.use(express.json());
 
 mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laqm4.mongodb.net:27017,cluster0-shard-00-01.laqm4.mongodb.net:27017,cluster0-shard-00-02.laqm4.mongodb.net:27017/travel?ssl=true&replicaSet=atlas-kjugp2-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
 
+// mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
 
 
+const HotelSchema = new mongoose.Schema({
+    hotelName: String,
+    hotelRate: String,
+    location: String,
+    hotelimg: String,
+
+
+})
 const PlaceSchema = new mongoose.Schema({
     name: String,
     img: String,
