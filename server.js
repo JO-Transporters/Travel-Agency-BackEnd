@@ -164,7 +164,9 @@ function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
 
+
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) =>{
+
         if (error) {
             res.send('did not work')
         } else {
