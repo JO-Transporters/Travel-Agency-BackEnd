@@ -14,8 +14,7 @@ mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laq
 // mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
 
 
-<<<<<<< HEAD
-=======
+
 const HotelSchema = new mongoose.Schema({
     hotelName: String,
     hotelRate: String,
@@ -23,7 +22,6 @@ const HotelSchema = new mongoose.Schema({
     hotelimg: String,
 
 })
->>>>>>> daed4bde3c9e7d464df74848ccf3c5d69ad53616
 const PlaceSchema = new mongoose.Schema({
     name: String,
     img: String,
@@ -120,12 +118,8 @@ server.put('/updatehotel/:placeId/:hotelIndex', updateHotel)
 function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
-<<<<<<< HEAD
 
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) =>{
-=======
-    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) => {
->>>>>>> daed4bde3c9e7d464df74848ccf3c5d69ad53616
         if (error) {
             res.send('did not work')
         } else {
