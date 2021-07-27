@@ -14,6 +14,7 @@ mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laq
 // mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
 
 
+
 const HotelSchema = new mongoose.Schema({
     hotelName: String,
     hotelRate: String,
@@ -26,7 +27,8 @@ const HotelSchema = new mongoose.Schema({
 const PlaceSchema = new mongoose.Schema({
     name: String,
     img: String,
-    hotels: [HotelSchema]
+    hotels: [HotelSchema],
+    slideShow:Array
 });
 
 const AdminSchema = new mongoose.Schema({
@@ -176,16 +178,20 @@ function gettingPlaces(req, res) {
 
 
 function addPlace(req, res) {
-    const { name, img } = req.body;
+    const { name, img ,slideShowimg} = req.body;
+   
+
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) {
             res.send('did not work')
         } else {
             userData[0].places.push({
                 name: name,
-                img: img
+                img: img,
+                slideShow:slideShowimg
             })
             userData[0].save()
+            console.log(userData[0].places);
             res.send(userData[0].places)
         }
     })
@@ -214,14 +220,17 @@ function deletePlace(req, res) {
 
 function updatePlace(req, res) {
     let placeIndex = req.params.placeId;
-    const { name, img } = req.body;
+    const { name, img, slideShowimg,hotels} = req.body;
 
     adminModel.findOne({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) { res.send('did not work') }
         else {
+            // let hotel=userData.places[placeIndex]
             userData.places.splice(placeIndex, 1, {
                 name: name,
                 img: img,
+                slideShow:slideShowimg,
+                hotels:hotels
             })
             userData.save();
             res.send(userData.places)
