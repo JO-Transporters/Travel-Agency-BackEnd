@@ -28,7 +28,8 @@ const PlaceSchema = new mongoose.Schema({
     name: String,
     img: String,
     hotels: [HotelSchema],
-    slideShow:Array
+    slideShow:Array,
+    center : Array,
 });
 
 const AdminSchema = new mongoose.Schema({
@@ -178,7 +179,7 @@ function gettingPlaces(req, res) {
 
 
 function addPlace(req, res) {
-    const { name, img ,slideShowimg} = req.body;
+    const { name, img ,slideShowimg ,center} = req.body;
    
 
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
@@ -188,7 +189,8 @@ function addPlace(req, res) {
             userData[0].places.push({
                 name: name,
                 img: img,
-                slideShow:slideShowimg
+                slideShow:slideShowimg,
+                center : center,
             })
             userData[0].save()
             console.log(userData[0].places);
@@ -220,7 +222,7 @@ function deletePlace(req, res) {
 
 function updatePlace(req, res) {
     let placeIndex = req.params.placeId;
-    const { name, img, slideShowimg,hotels} = req.body;
+    const { name, img, slideShowimg,hotels,center} = req.body;
 
     adminModel.findOne({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) { res.send('did not work') }
@@ -230,7 +232,8 @@ function updatePlace(req, res) {
                 name: name,
                 img: img,
                 slideShow:slideShowimg,
-                hotels:hotels
+                hotels:hotels,
+                center : center,
             })
             userData.save();
             res.send(userData.places)
