@@ -20,6 +20,9 @@ const HotelSchema = new mongoose.Schema({
     hotelRate: String,
     location: String,
     hotelimg: String,
+    price: String,
+
+
 })
 const PlaceSchema = new mongoose.Schema({
     name: String,
@@ -39,7 +42,8 @@ const BookedSchema = new mongoose.Schema({
     checkOutDate: String,
     visitorsNum: String,
     roomsNum: String,
-    kidsNum: String
+    kidsNum: String,
+    price:String,
 })
 
 const UserSchema = new mongoose.Schema({
@@ -163,10 +167,7 @@ server.delete('/deletebook/:id/:email', deletebookedData);
 function gettingPlaces(req, res) {
     // let userEmail = req.query.userEmail;
 
-
-
-    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, (error, userData) =>{
-
+    adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) {
             res.send('did not work')
         } else {
@@ -240,7 +241,7 @@ function updatePlace(req, res) {
 function addHotel(req, res) {
     placeIndex = Number(req.params.Id);
 
-    const { hotelName, hotelimg, hotelRate, location } = req.body;
+    const { hotelName, hotelimg, hotelRate, location ,price} = req.body;
 
     adminModel.find({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
         if (error) {
@@ -251,6 +252,7 @@ function addHotel(req, res) {
                 hotelRate: hotelRate,
                 location: location,
                 hotelimg: hotelimg,
+                price: price
 
             })
             userData[0].save()
@@ -285,7 +287,7 @@ function deleteHotel(req, res) {
 function updateHotel(req, res) {
     let placeIndex = req.params.placeId;
     let hotelIndex = req.params.hotelIndex;
-    const { hotelName, hotelRate, location, hotelimg } = req.body
+    const { hotelName, hotelRate, location, hotelimg ,price} = req.body
 
 
     adminModel.findOne({ email: 'ibrahimkuderat@gmail.com' }, function (error, userData) {
@@ -295,7 +297,8 @@ function updateHotel(req, res) {
                 hotelName: hotelName,
                 hotelRate: hotelRate,
                 location: location,
-                hotelimg: hotelimg
+                hotelimg: hotelimg,
+                price: price
             })
             userData.save();
             res.send(userData.places)
@@ -327,8 +330,9 @@ function myBooks(req, res) {
 }
 
 function bookroom(req, res) {
-    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber } = req.body;
-    console.log('req.body : ', req.body);
+    const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber ,price} = req.body;
+    console.log('req.body : ', req.body.price);
+    console.log(req.body.hotelName);
 
     userModel.find({ usersList: "usersList" }, function (error, userData) {
         if (error) {
@@ -344,7 +348,8 @@ function bookroom(req, res) {
                         checkOutDate: checkOutDate,
                         visitorsNum: visitorsNum,
                         roomsNum: roomsNum,
-                        kidsNum: kidsNum
+                        kidsNum: kidsNum,
+                        price: price,
                     })
                     userData[0].save();
                     res.send(user);
@@ -352,8 +357,8 @@ function bookroom(req, res) {
                     return user
                 }
             })
-            console.log('old info : ', userData[0].users);
-            console.log('returned user :', returnedUser);
+            // console.log('old info : ', userData[0].users);
+            // console.log('returned user :', returnedUser);
             //To ckeck if there in no user
             if (returnedUser.length == 0) {
                 userData[0].users.push({
@@ -366,7 +371,8 @@ function bookroom(req, res) {
                         checkOutDate: checkOutDate,
                         visitorsNum: visitorsNum,
                         roomsNum: roomsNum,
-                        kidsNum: kidsNum
+                        kidsNum: kidsNum,
+                        price: price,
                     }]
                 })
                 userData[0].save();
