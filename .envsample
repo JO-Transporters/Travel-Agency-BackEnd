@@ -1,1 +1,2 @@
-MONGO_DB = <Atlas Link>
+ATLAS_MONGO_DB = <Atlas Link>
+PORT = <PORT>

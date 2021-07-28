@@ -6,10 +6,11 @@ const axios = require('axios');
 const server = express();
 server.use(cors());
 server.use(express.json());
+const PORT = process.env.PORT;
+const ATLAS_MONGO_DB = process.env.ATLAS_MONGO_DB 
 
 
-
-mongoose.connect('mongodb://Ibrahim-Khdairat:0010097790@cluster0-shard-00-00.laqm4.mongodb.net:27017,cluster0-shard-00-01.laqm4.mongodb.net:27017,cluster0-shard-00-02.laqm4.mongodb.net:27017/travel?ssl=true&replicaSet=atlas-kjugp2-shard-0&authSource=admin&retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(`${ATLAS_MONGO_DB}`, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // mongoose.connect('mongodb://localhost:27017/travel', { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -463,6 +464,6 @@ function deletebookedData(req, res) {
 
 
 
-server.listen(3001, () => {
-    console.log(`Listenng on Port : ${3001}`);
+server.listen(PORT, () => {
+    console.log(`Listenng on Port : ${PORT}`);
 })
