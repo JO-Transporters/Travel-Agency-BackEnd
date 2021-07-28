@@ -193,7 +193,6 @@ function addPlace(req, res) {
                 center : center,
             })
             userData[0].save()
-            console.log(userData[0].places);
             res.send(userData[0].places)
         }
     })
@@ -334,8 +333,7 @@ function myBooks(req, res) {
 
 function bookroom(req, res) {
     const { hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum, userName, userEmail, phoneNumber ,price} = req.body;
-    console.log('req.body : ', req.body.price);
-    console.log(req.body.hotelName);
+
 
     userModel.find({ usersList: "usersList" }, function (error, userData) {
         if (error) {
@@ -360,8 +358,7 @@ function bookroom(req, res) {
                     return user
                 }
             })
-            // console.log('old info : ', userData[0].users);
-            // console.log('returned user :', returnedUser);
+           
             //To ckeck if there in no user
             if (returnedUser.length == 0) {
                 userData[0].users.push({
@@ -386,10 +383,8 @@ function bookroom(req, res) {
                     }
                 })
 
-                console.log('response user :', user);
                 res.send(user);
 
-                console.log('updated data : ', userData[0].users);
             }
 
 
@@ -404,7 +399,7 @@ function updateBookedData(req, res) {
     let bookedId = Number(req.params.id);
     let userEmail = req.params.email;
 
-    const {hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum } = req.body;
+    const {hotelName, checkInDate, checkOutDate, visitorsNum, roomsNum, kidsNum ,price} = req.body;
 
     userModel.find({ usersList: "usersList" }, function (error, userData) {
         if (error) {
@@ -420,7 +415,8 @@ function updateBookedData(req, res) {
                         checkOutDate: checkOutDate,
                         visitorsNum: visitorsNum,
                         roomsNum: roomsNum,
-                        kidsNum: kidsNum
+                        kidsNum: kidsNum,
+                        price : price,
                     })
                     userData[0].save();
 
@@ -449,7 +445,6 @@ function deletebookedData(req, res) {
             userData[0].users.filter((user, userIndex) => {
 
                 if (user.userEmail == userEmail) {
-                    console.log('old data : ', userData[0].users[userIndex].bookedData);
 
                     let filteredBooks = userData[0].users[userIndex].bookedData.filter((book, index) => {
                         if (index !== bookedIndex) { return book }
